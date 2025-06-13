@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>World Flag Quiz</title>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+  />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #031f3e;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+    /* Removed sidebar styles since we won't show landmark/fact */
+    .quiz-box {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .quiz-box img {
+      width: 320px;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+    .options button {
+      display: block;
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      background: #f1f5f9;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .options button:hover:not(:disabled) {
+      background: #dbeafe;
+    }
+    .options button:disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
+    #next-btn {
+      margin-top: 1rem;
+      padding: 0.75rem 2rem;
+      background-color: #002147;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #feedback {
+      margin: 1rem 0;
+      font-weight: 600;
+    }
+    footer {
+      background: #002147;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+      width: 100%;
+    }
+    #timer {
+      font-weight: bold;
+      color: darkred;
+    }
+  </style>
+</head>
+<body>
+  <header>🌍 Games & Quizzes - Name That World Flag!</header>
+  <div class="container">
+    <main class="quiz-box" style="width: 100%; max-width: 600px;">
+      <div id="timer">⏱️ Time Left: 15s</div>
+      <div id="score">Score: 0</div>
+      <div id="progress">
+        Question <span id="q-num">1</span> of 25
+      </div>
+      <img id="flag" src="" alt="Flag" />
+      <div class="options" id="choices"></div>
+      <div id="feedback"></div>
+      <button id="next-btn">Next</button>
+    </main>
+  </div>
+  <footer>
+    Sign up to get more quizzes every day!
+    <br />
+    <input type="email" placeholder="Enter your email" />
+    <button>Subscribe</button>
+  </footer>
+  <script>
+    const flags = [
+      {
+        img: "https://flagcdn.com/w320/fr.png",
+        answer: "France",
+        options: ["France", "Italy", "Germany", "Netherlands"],
+      },
+      {
+        img: "https://flagcdn.com/w320/jp.png",
+        answer: "Japan",
+        options: ["South Korea", "Japan", "China", "Vietnam"],
+      },
+      {
+        img: "https://flagcdn.com/w320/br.png",
+        answer: "Brazil",
+        options: ["Argentina", "Brazil", "Colombia", "Mexico"],
+      },
+      {
+        img: "https://flagcdn.com/w320/ca.png",
+        answer: "Canada",
+        options: ["Austria", "Switzerland", "Canada", "Norway"],
+      },
+      {
+        img: "https://flagcdn.com/w320/de.png",
+        answer: "Germany",
+        options: ["Belgium", "Germany", "Poland", "Austria"],
+      },
+      {
+        img: "https://flagcdn.com/w320/it.png",
+        answer: "Italy",
+        options: ["Italy", "Mexico", "Hungary", "Ireland"],
+      },
+      {
+        img: "https://flagcdn.com/w320/au.png",
+        answer: "Australia",
+        options: ["New Zealand", "Australia", "Fiji", "United Kingdom"],
+      },
+      {
+        img: "https://flagcdn.com/w320/in.png",
+        answer: "India",
+        options: ["India", "Pakistan", "Bangladesh", "Nepal"],
+      },
+      {
+        img: "https://flagcdn.com/w320/ru.png",
+        answer: "Russia",
+        options: ["Russia", "Belarus", "Ukraine", "Kazakhstan"],
+      },
+      {
+        img: "https://flagcdn.com/w320/mx.png",
+        answer: "Mexico",
+        options: ["Mexico", "Italy", "Portugal", "Spain"],
+      },
+      {
+        img: "https://flagcdn.com/w320/za.png",
+        answer: "South Africa",
+        options: ["South Africa", "Kenya", "Nigeria", "Ghana"],
+      },
+      {
+        img: "https://flagcdn.com/w320/eg.png",
+        answer: "Egypt",
+        options: ["Morocco", "Egypt", "Algeria", "Tunisia"],
+      },
+      {
+        img: "https://flagcdn.com/w320/es.png",
+        answer: "Spain",
+        options: ["Portugal", "Spain", "Italy", "France"],
+      },
+      {
+        img: "https://flagcdn.com/w320/se.png",
+        answer: "Sweden",
+        options: ["Norway", "Finland", "Denmark", "Sweden"],
+      },
+      {
+        img: "https://flagcdn.com/w320/no.png",
+        answer: "Norway",
+        options: ["Iceland", "Norway", "Denmark", "Sweden"],
+      },
+      {
+        img: "https://flagcdn.com/w320/kr.png",
+        answer: "South Korea",
+        options: ["North Korea", "Japan", "South Korea", "China"],
+      },
+      {
+        img: "https://flagcdn.com/w320/tr.png",
+        answer: "Turkey",
+        options: ["Turkey", "Tunisia", "Morocco", "Algeria"],
+      },
+      {
+        img: "https://flagcdn.com/w320/nz.png",
+        answer: "New Zealand",
+        options: ["Australia", "New Zealand", "Fiji", "Papua New Guinea"],
+      },
+      {
+        img: "https://flagcdn.com/w320/pt.png",
+        answer: "Portugal",
+        options: ["Spain", "Portugal", "Italy", "France"],
+      },
+      {
+        img: "https://flagcdn.com/w320/ua.png",
+        answer: "Ukraine",
+        options: ["Belarus", "Poland", "Ukraine", "Russia"],
+      },
+      {
+        img: "https://flagcdn.com/w320/ar.png",
+        answer: "Argentina",
+        options: ["Chile", "Argentina", "Uruguay", "Paraguay"],
+      },
+      {
+        img: "https://flagcdn.com/w320/gb.png",
+        answer: "United Kingdom",
+        options: ["United Kingdom", "Australia", "Canada", "New Zealand"],
+      },
+      {
+        img: "https://flagcdn.com/w320/be.png",
+        answer: "Belgium",
+        options: ["Belgium", "Netherlands", "Germany", "France"],
+      },
+      {
+        img: "https://flagcdn.com/w320/ir.png",
+        answer: "Ireland",
+        options: ["Ireland", "Italy", "Iceland", "Norway"],
+      },
+      {
+        img: "https://flagcdn.com/w320/nl.png",
+        answer: "Netherlands",
+        options: ["Netherlands", "Belgium", "Luxembourg", "Germany"],
+      },
+    ];
+
+    // Shuffle the quiz questions
+    const quiz = [...flags].sort(() => 0.5 - Math.random());
+    let current = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 15;
+
+    const flagImg = document.getElementById("flag");
+    const choicesDiv = document.getElementById("choices");
+    const feedback = document.getElementById("feedback");
+    const scoreDisplay = document.getElementById("score");
+    const nextBtn = document.getElementById("next-btn");
+    const timerDisplay = document.getElementById("timer");
+    const qNum = document.getElementById("q-num");
+
+    function loadQuestion() {
+      feedback.textContent = "";
+      timeLeft = 15;
+      updateTimerDisplay();
+      clearInterval(timer);
+      timer = setInterval(countdown, 1000);
+
+      const question = quiz[current];
+      flagImg.src = question.img;
+      qNum.textContent = current + 1;
+
+      choicesDiv.innerHTML = "";
+      question.options.forEach((option) => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.onclick = () => selectAnswer(option);
+        choicesDiv.appendChild(btn);
+      });
+      nextBtn.disabled = true;
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = `⏱️ Time Left: ${timeLeft}s`;
+    }
+
+    function countdown() {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        feedback.textContent = `⏰ Time's up! Correct answer: ${quiz[current].answer}`;
+        nextBtn.disabled = false;
+        disableChoices();
+      }
+    }
+
+    function disableChoices() {
+      const buttons = choicesDiv.querySelectorAll("button");
+      buttons.forEach((btn) => (btn.disabled = true));
+    }
+
+    function selectAnswer(selected) {
+      clearInterval(timer);
+      disableChoices();
+      const correct = quiz[current].answer;
+      if (selected === correct) {
+        feedback.textContent = "✅ Correct!";
+        score++;
+      } else {
+        feedback.textContent = `❌ Wrong! Correct answer: ${correct}`;
+      }
+      scoreDisplay.textContent = `Score: ${score}`;
+      nextBtn.disabled = false;
+    }
+
+    nextBtn.onclick = () => {
+      current++;
+      if (current < quiz.length) {
+        loadQuestion();
+      } else {
+        clearInterval(timer);
+        feedback.textContent = `🎉 Quiz complete! Final score: ${score}/${quiz.length}`;
+        nextBtn.disabled = true;
+        choicesDiv.innerHTML = "";
+        timerDisplay.textContent = "";
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      nextBtn.disabled = true;
+      loadQuestion();
+    });
+  </script>
+</body>
+</html>
